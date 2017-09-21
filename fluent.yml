@@ -1,0 +1,36 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: papertrail
+spec:
+  template:
+    metadata:
+      labels:
+        name: papertrail
+    spec:
+      containers:
+      - name: papertrail
+        image: arobson/fluentd-papertrail
+        imagePullPolicy: Always
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: dockercontainers
+          mountPath: /var/lib/docker/containers
+        - name: varlog
+          mountPath: /var/log
+        - name: config
+          mountPath: /fluentd/etc
+      volumes:
+      - name: dockercontainers
+        hostPath: 
+          path: /var/lib/docker/containers
+      - name: varlog
+        hostPath: 
+          path: /var/log
+      - name: config
+        configMap:
+          name: papertrail-config
+          items:
+            - key: fluent.conf
+              path: fluent.conf
